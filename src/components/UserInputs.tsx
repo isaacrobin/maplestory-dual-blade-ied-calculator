@@ -1,46 +1,71 @@
 import { useEffect, useState } from "react";
-import { blades_of_destiny_damage_proportion, blades_of_destiny_ied_modifier, haunted_edge_damage_proportion, haunted_edge_ied_modifier, phantom_blow_damage_proportion, phantom_blow_ied_bonuses } from "../formulas/constants";
-import { calculate_effective_ied, calculate_final_damage_gain, calculate_total_ied_gain_from_multiple_sources } from "../formulas/formulas";
+import { bladesOfDestinyIedModifier, hauntedEdgeIedModifier, originSkillIed, phantomBlowIedBonuses } from "../formulas/constants";
+import { calculateEffectiveIed, calculateFinalDamageGain, calculateTotalIedGainFromMultipleSources as calculateTotalIedGainedFromMultipleSources } from "../formulas/formulas";
+import LabeledListInput from "./LabeledListInput";
+import LabeledTextInput from "./LabeledTextInput";
+import { clamp } from "../utilts";
 
 const UserInputs = () => {
-    const [visual_ied_input, set_visual_ied_input] = useState('');
-    const [visual_ied, set_visual_ied] = useState(0);
-    const [enemy_pdr, set_enemy_pdr] = useState(0);
-    const [ied_gained, set_ied_gained] = useState([0]);
+    const [visualIed, setVisualIed] = useState(0);
+    const [enemyPdr, setEnemyPdr] = useState(0);
+    const [iedGained, setIedGained] = useState([0]);
+    const [phantomBlowDamageProportion, setPhantomBlowDamageProportion] = useState(0);
+    const [hauntedEdgeDamageProportion, setHauntedEdgeDamageProportion] = useState(0);
+    const [bladesOfDestinyDamageProportion, setBladesOfDestinyDamageProportion] = useState(0);
+    const [karmaBladeDamageProportion, setKarmaBladeDamageProportion] = useState(0);
+    const [karmaBladeLevel, setKarmaBladeLevel] = useState(0);
+    const [karmaBladeIedModifier, setKarmaBladeIedModifier] = useState(0);
 
     useEffect(() => {
-        if (!isNaN(+visual_ied_input)) {
-            set_visual_ied(+visual_ied_input / 100);
-        }
-    }, [visual_ied_input]);
+        const clampedKarmaBladeLevel = clamp(karmaBladeLevel, 0, 30);
+        const originSkillBonusIndex = Math.floor(clampedKarmaBladeLevel / 10);
+        const newKarmaBladeIedModifier = originSkillIed[originSkillBonusIndex];
+        setKarmaBladeIedModifier(newKarmaBladeIedModifier);
+    }, [karmaBladeLevel]);
 
-    const phantom_blow_ied_modifier = calculate_total_ied_gain_from_multiple_sources(phantom_blow_ied_bonuses);
+    const phantomBlowIedModifier = calculateTotalIedGainedFromMultipleSources(phantomBlowIedBonuses);
 
-    const haunted_edge_effective_ied = calculate_effective_ied(visual_ied, haunted_edge_ied_modifier);
-    const blades_of_destiny_effective_ied = calculate_effective_ied(visual_ied, blades_of_destiny_ied_modifier);
-    const phantom_blow_effective_ied = calculate_effective_ied(visual_ied, phantom_blow_ied_modifier);
+    const hauntedEdgeEffectiveIed = calculateEffectiveIed(visualIed, hauntedEdgeIedModifier);
+    const bladesOfDestinyEffectiveIed = calculateEffectiveIed(visualIed, bladesOfDestinyIedModifier);
+    const phantomBlowEffectiveIed = calculateEffectiveIed(visualIed, phantomBlowIedModifier);
+    const karmaBladeEffectiveIed = calculateEffectiveIed(visualIed, karmaBladeIedModifier);
 
-    const final_damage_gained_on_phantom_blow = calculate_final_damage_gain(phantom_blow_effective_ied, enemy_pdr, ied_gained);
+    const finalDamageGainedOnPhantomBlow = calculateFinalDamageGain(phantomBlowEffectiveIed, enemyPdr, iedGained);
 
-    const final_damage_gained_on_blades_of_destiny = calculate_final_damage_gain(blades_of_destiny_effective_ied, enemy_pdr, ied_gained);
+    const finalDamageGainedOnBladesOfDestiny = calculateFinalDamageGain(bladesOfDestinyEffectiveIed, enemyPdr, iedGained);
 
-    const final_damage_gained_on_haunted_edge = calculate_final_damage_gain(haunted_edge_effective_ied, enemy_pdr, ied_gained);
+    const finalDamageGainedOnHauntedEdge = calculateFinalDamageGain(hauntedEdgeEffectiveIed, enemyPdr, iedGained);
 
-    const total_final_damage_gained = phantom_blow_damage_proportion * final_damage_gained_on_phantom_blow + haunted_edge_damage_proportion * final_damage_gained_on_haunted_edge + blades_of_destiny_damage_proportion * final_damage_gained_on_blades_of_destiny;
-    console.log(phantom_blow_damage_proportion, final_damage_gained_on_phantom_blow, haunted_edge_damage_proportion, final_damage_gained_on_haunted_edge, blades_of_destiny_damage_proportion, final_damage_gained_on_blades_of_destiny)
+    const finalDamageGainedOnKarmaBlade = calculateFinalDamageGain(karmaBladeEffectiveIed, enemyPdr, iedGained);
 
-    console.log(total_final_damage_gained);
+    const totalFinalDamageGained = phantomBlowDamageProportion * finalDamageGainedOnPhantomBlow + hauntedEdgeDamageProportion * finalDamageGainedOnHauntedEdge + bladesOfDestinyDamageProportion * finalDamageGainedOnBladesOfDestiny + karmaBladeDamageProportion * finalDamageGainedOnKarmaBlade;
+    console.log(phantomBlowDamageProportion, finalDamageGainedOnPhantomBlow, hauntedEdgeDamageProportion, finalDamageGainedOnHauntedEdge, bladesOfDestinyDamageProportion, finalDamageGainedOnBladesOfDestiny)
+
+    console.log(totalFinalDamageGained);
     return (
-        <div className='App' style={{ display: "flex", flexDirection: "column" }}>
-            <label>visual ied</label>
-            <input type="text" value={visual_ied_input} onChange={(event) => { set_visual_ied_input(event.target.value) }} />
-            <br />
-            <label>enemy pdr</label>
-            <input type="text" value={enemy_pdr.toString()} onChange={(event) => { set_enemy_pdr(+event.target.value) }} />
-            <br />
-            <label>ied gained</label>
-            <input type="text" value={ied_gained.map(value => (value * 100).toString())} onChange={(event) => { set_ied_gained(event.target.value.split(',').map(value => Number(value) / 100)) }} />
-            <label>final damage gained: {total_final_damage_gained.toFixed(2)}</label>
+        <div className='App' style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
+            <fieldset>
+                <legend>IED info</legend>
+                <LabeledTextInput label="Visual IED (%)" value={visualIed} setValue={setVisualIed} convertToDecimal />
+                <LabeledTextInput label="Enemy PDR" value={enemyPdr} setValue={setEnemyPdr} />
+                <LabeledListInput label="IED Gained (%)" value={iedGained} setValue={setIedGained} />
+            </fieldset>
+
+            <fieldset>
+                <legend>IED-variable Skill Damage Proportions</legend>
+                <LabeledTextInput label="Percent of total damage dealt by phantom blow (%)" value={phantomBlowDamageProportion} setValue={setPhantomBlowDamageProportion} convertToDecimal />
+                <LabeledTextInput label="Percent of total damage dealt by haunted edge (%)" value={hauntedEdgeDamageProportion} setValue={setHauntedEdgeDamageProportion} convertToDecimal />
+                <LabeledTextInput label="Percent of total damage dealt by blades of destiny (%)" value={bladesOfDestinyDamageProportion} setValue={setBladesOfDestinyDamageProportion} convertToDecimal />
+            </fieldset>
+
+
+            <fieldset>
+                <LabeledTextInput label="Percent of total damage dealt by karma blade [origin skill] (%)" value={karmaBladeDamageProportion} setValue={setKarmaBladeDamageProportion} convertToDecimal />
+                <legend>Origin Skill Info</legend>
+                <LabeledTextInput label="Karma Blade level" value={karmaBladeLevel} setValue={setKarmaBladeLevel} />
+
+            </fieldset>
+            <label>Final damage gained: {totalFinalDamageGained.toFixed(2)}</label>
         </div>
     );
 }
