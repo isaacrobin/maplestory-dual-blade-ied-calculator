@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/maplestory-dual-blade-ied-calculator/static/css/main.f855e6bc.css",
+    "main.js": "/maplestory-dual-blade-ied-calculator/static/js/main.d572ade4.js",
+    "static/js/787.40ed72a4.chunk.js": "/maplestory-dual-blade-ied-calculator/static/js/787.40ed72a4.chunk.js",
+    "index.html": "/maplestory-dual-blade-ied-calculator/index.html",
+    "main.f855e6bc.css.map": "/maplestory-dual-blade-ied-calculator/static/css/main.f855e6bc.css.map",
+    "main.d572ade4.js.map": "/maplestory-dual-blade-ied-calculator/static/js/main.d572ade4.js.map",
+    "787.40ed72a4.chunk.js.map": "/maplestory-dual-blade-ied-calculator/static/js/787.40ed72a4.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.d572ade4.js"
+  ]
+}
