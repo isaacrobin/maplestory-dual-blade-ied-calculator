@@ -40,6 +40,7 @@ const UserInputs = () => {
             <br />
             <label>ied gained</label>
             <input type="text" value={ied_gained.map(value => (value * 100).toString())} onChange={(event) => { set_ied_gained(event.target.value.split(',').map(value => Number(value) / 100)) }} />
+            <label>final damage gained: {total_final_damage_gained.toFixed(2)}</label>
         </div>
     );
 }
